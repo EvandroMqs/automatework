@@ -204,6 +204,26 @@ def login_user(username, password):
     response = requests.post(f'{API_URL}/login', json={'username': username, 'password': password})
     return response.json()
 
+def handle_register(username, password):
+    try:
+        response = register_user(username, password)
+        if response['message'] == 'User registered successfully':
+            show_login_page()
+        else:
+            messagebox.showerror("Error", response['message'])
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def handle_login(username, password):
+    try:
+        response = login_user(username, password)
+        if response['message'] == 'Login successful':
+            show_main_page()
+        else:
+            messagebox.showerror("Error", response['message'])
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
 # Função para exibir a página de login
 def show_login_page():
     for widget in root.winfo_children():
@@ -220,13 +240,7 @@ def show_login_page():
     password_entry.pack(pady=5)
 
     def login():
-        username = username_entry.get()
-        password = password_entry.get()
-        response = login_user(username, password)
-        if response['message'] == 'Login successful':
-            show_main_page()
-        else:
-            messagebox.showerror("Error", response['message'])
+        threading.Thread(target=handle_login, args=(username_entry.get(), password_entry.get())).start()
 
     def show_register_page():
         show_registration_page()
@@ -250,13 +264,7 @@ def show_registration_page():
     password_entry.pack(pady=5)
 
     def register():
-        username = username_entry.get()
-        password = password_entry.get()
-        response = register_user(username, password)
-        if response['message'] == 'User registered successfully':
-            show_login_page()
-        else:
-            messagebox.showerror("Error", response['message'])
+        threading.Thread(target=handle_register, args=(username_entry.get(), password_entry.get())).start()
 
     ctk.CTkButton(root, text="Register", command=register, font=("Arial", 14)).pack(pady=10)
     ctk.CTkButton(root, text="Back to Login", command=show_login_page, font=("Arial", 14)).pack()
